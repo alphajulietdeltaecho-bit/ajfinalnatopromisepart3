@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#08090b" />
+  <title>The James Allen Cup 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="noise"></div><div class="grid-bg"></div>
+  <header class="topbar"><div class="brand-mini">FRIDAY FUNDAY</div><div class="season-chip">2026 EDITION</div></header>
+  <main id="app">
+    <section class="screen active" id="landing-screen"><div class="hero"><p class="eyebrow">FRIDAY FUNDAY PRESENTS</p><div class="cup-mark"><span></span><i></i><span></span></div><h1><span>THE</span>JAMES ALLEN CUP<strong>2026</strong></h1><p class="tagline">Five Challenges. One Champion.</p><button class="primary-btn" id="enter-cup-btn"><span>ENTER THE CUP</span><b>→</b></button><p class="microcopy">Official Friday Funday competition platform</p></div></section>
+
+    <section class="screen" id="register-screen"><div class="panel narrow"><div class="section-kicker">COMPETITOR REGISTRATION</div><h2>Enter the Cup</h2><p class="section-copy">Register once. Your Cup ID will be generated automatically.</p><div class="form-grid"><label><span>Full Name</span><input id="full-name" type="text" autocomplete="name" placeholder="Enter your full name" maxlength="70" /></label><label><span>Department</span><select id="department"><option value="">Select department</option><option>OPS</option><option>FNB</option><option>ACCOUNTS</option><option>BD</option><option>IT</option></select></label><p class="error-text" id="register-error" aria-live="polite"></p><button class="primary-btn full" id="register-btn"><span>GENERATE CUP ID</span><b>→</b></button></div><button class="text-btn" data-go="landing-screen">← Back</button></div></section>
+
+    <section class="screen" id="id-screen"><div class="panel narrow center"><div class="scanner"></div><p class="eyebrow">REGISTRATION CONFIRMED</p><h2>Welcome, <span id="welcome-name">Competitor</span></h2><div class="id-card"><small>YOUR CUP ID</small><strong id="cup-id">JC-0000</strong><span id="welcome-department">DEPARTMENT</span></div><p class="section-copy">Keep this ID. It identifies your tournament entry.</p><button class="primary-btn" id="continue-briefing-btn"><span>CONTINUE</span><b>→</b></button></div></section>
+
+    <section class="screen" id="briefing-screen"><div class="panel"><div class="section-kicker">CUP BRIEFING</div><h2>Competition Protocol</h2><div class="briefing-grid"><article><span>01</span><h3>Complete every challenge</h3><p>All five events contribute to your final tournament result.</p></article><article><span>02</span><h3>One official attempt</h3><p>Once a challenge is completed, it becomes permanently locked.</p></article><article><span>03</span><h3>Stay focused</h3><p>Each mission becomes more demanding as it progresses.</p></article><article><span>04</span><h3>Scores remain hidden</h3><p>Official results will only appear after the Game Master reveals them.</p></article></div><button class="primary-btn" id="begin-btn"><span>BEGIN THE CUP</span><b>→</b></button></div></section>
+
+    <section class="screen" id="hub-screen"><div class="hub-head"><div><p class="eyebrow">THE JAMES ALLEN CUP 2026</p><h2>Challenge Hub</h2></div><div class="player-chip"><small>COMPETITOR</small><strong id="hub-id">JC-0000</strong></div></div><div class="progress-row"><span>TOURNAMENT PROGRESS</span><div class="progress-track"><i id="progress-fill"></i></div><b id="progress-label">0 / 5</b></div><div class="challenge-grid" id="challenge-grid"></div></section>
+
+    <section class="screen" id="mission-screen"><div class="panel narrow center"><p class="eyebrow" id="mission-number">CHALLENGE I</p><div class="large-icon" id="mission-icon">⚡</div><h2 id="mission-title">Reflex Protocol</h2><p class="section-copy" id="mission-description"></p><div class="rules-strip" id="mission-rules"></div><button class="primary-btn" id="start-mission-btn"><span>START CHALLENGE</span><b>→</b></button><button class="text-btn" data-go="hub-screen">← Return to hub</button></div></section>
+
+    <section class="screen" id="reaction-screen"><div class="game-shell"><div class="game-hud"><div><small>CHALLENGE I</small><strong>REFLEX PROTOCOL</strong></div><div><small>ROUND</small><strong id="reaction-round">1 / 10</strong></div></div><button class="reaction-field idle" id="reaction-field"><span class="signal-dot"></span><strong id="reaction-message">CLICK TO ARM</strong><small id="reaction-submessage">Wait for green. Early clicks do not count.</small></button><div class="round-history" id="reaction-history"></div></div></section>
+
+    <section class="screen" id="typing-screen"><div class="game-shell"><div class="game-hud"><div><small>CHALLENGE II</small><strong>TYPING RUSH</strong></div><div><small>TIME</small><strong id="typing-time">75</strong></div></div><div class="typing-panel"><div class="typing-stats"><div><small>WPM</small><strong id="typing-wpm">0</strong></div><div><small>ACCURACY</small><strong id="typing-accuracy">100%</strong></div><div><small>MISTAKES</small><strong id="typing-mistakes">0</strong></div></div><div class="typing-passage" id="typing-passage" role="textbox" aria-label="Typing passage" tabindex="0"></div><textarea id="typing-input" class="typing-capture" aria-label="Typing input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea><p class="typing-note"><span id="typing-focus-status">Click the passage and start typing.</span> The timer begins on your first keystroke.</p></div></div></section>
+
+    <section class="screen" id="memory-screen"><div class="game-shell"><div class="game-hud"><div><small>CHALLENGE III</small><strong>MEMORY MATRIX</strong></div><div><small>STAGE</small><strong id="memory-stage">1 / 6</strong></div></div><div class="memory-wrap"><p id="memory-message">Memorize the illuminated cells.</p><div class="memory-board" id="memory-board"></div><button class="primary-btn" id="memory-submit-btn" disabled><span>SUBMIT PATTERN</span><b>→</b></button></div></div></section>
+
+    <section class="screen" id="deadeye-screen"><div class="game-shell"><div class="game-hud"><div><small>CHALLENGE IV</small><strong>DEADEYE</strong></div><div><small>TARGETS</small><strong id="deadeye-count">0 / 30</strong></div></div><div class="deadeye-stats"><span>Hits <b id="deadeye-hits">0</b></span><span>Misses <b id="deadeye-misses">0</b></span><span>Combo <b id="deadeye-combo">0</b></span></div><div class="deadeye-arena" id="deadeye-arena"><button class="target" id="deadeye-target" aria-label="Target"></button></div></div></section>
+
+    <section class="screen" id="sequence-screen"><div class="game-shell"><div class="game-hud"><div><small>CHALLENGE V</small><strong>SEQUENCE RECALL</strong></div><div><small>LEVEL</small><strong id="sequence-level">1 / 9</strong></div></div><div class="sequence-wrap"><p id="sequence-message">Watch the sequence.</p><div class="sequence-grid" id="sequence-grid"></div><div class="sequence-progress" id="sequence-progress"></div></div></div></section>
+
+    <section class="screen" id="result-screen"><div class="panel narrow center"><div class="success-ring">✓</div><p class="eyebrow">CHALLENGE COMPLETE</p><h2 id="result-title">Mission Cleared</h2><p class="section-copy" id="result-copy">Your official result has been recorded.</p><button class="primary-btn" id="return-hub-btn"><span>RETURN TO HUB</span><b>→</b></button></div></section>
+
+    <section class="screen" id="complete-screen"><div class="panel narrow center completion"><div class="cup-mark"><span></span><i></i><span></span></div><p class="eyebrow">TOURNAMENT COMPLETE</p><h2>Five challenges cleared.</h2><p class="section-copy">Your official James Allen Cup attempt has been recorded. Final scores remain hidden until the Champion Reveal.</p><div class="id-card"><small>COMPETITOR</small><strong id="complete-id">JC-0000</strong><span id="complete-name">PLAYER</span></div><p class="tagline small">One Champion will be revealed.</p></div></section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
