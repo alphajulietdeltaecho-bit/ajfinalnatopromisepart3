@@ -13,6 +13,9 @@ const db = firebase.firestore();
 let firebaseUser = null;
 let cloudReady = false;
 let saveQueue = Promise.resolve();
+let tournamentLocked = false;
+let tournamentSettingsUnsubscribe = null;
+let revealStarted = false;
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const screens=$$('.screen');
@@ -72,14 +75,96 @@ const firebaseReady=(async()=>{
   firebaseUser=credential.user;
   cloudReady=true;
   await loadCloudState();
+  beginTournamentSettings();
   return firebaseUser;
 })().catch(err=>{
   console.error('Firebase initialization failed:',err);
   cloudReady=false;
   return null;
 });
-function show(id){screens.forEach(s=>s.classList.toggle('active',s.id===id));window.scrollTo({top:0,behavior:'smooth'})}
+function show(id,force=false){if(tournamentLocked&&!force&&id!=='champion-screen')return;screens.forEach(s=>s.classList.toggle('active',s.id===id));window.scrollTo({top:0,behavior:'smooth'})}
 function cupId(){const a='ABCDEFGHJKLMNPQRSTUVWXYZ';return `${a[Math.floor(Math.random()*a.length)]}${a[Math.floor(Math.random()*a.length)]}-${Math.floor(1000+Math.random()*9000)}`}
+
+function escReveal(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))}
+function stopTournamentActivity(){
+  tournamentLocked=true;
+  if(rr?.timer)clearTimeout(rr.timer);
+  if(tr?.timer)clearInterval(tr.timer);
+  rr=null;tr=null;mr=null;dr=null;sr=null;
+  const target=$('#deadeye-target');
+  if(target)target.style.display='none';
+  $('#typing-input')?.blur();
+}
+function beginTournamentSettings(){
+  if(tournamentSettingsUnsubscribe)tournamentSettingsUnsubscribe();
+  tournamentSettingsUnsubscribe=db.collection('settings').doc('tournament').onSnapshot(snapshot=>{
+    if(!snapshot.exists)return;
+    const settings=snapshot.data()||{};
+    if(settings.locked)stopTournamentActivity();
+    if(settings.revealed&&settings.locked)launchChampionReveal(settings);
+  },error=>console.error('Tournament settings listener failed:',error));
+}
+function makeRevealParticles(){
+  const host=$('#reveal-particles');
+  if(!host||host.children.length)return;
+  for(let i=0;i<34;i++){
+    const particle=document.createElement('i');
+    particle.style.setProperty('--x',`${Math.random()*100}%`);
+    particle.style.setProperty('--delay',`${Math.random()*4}s`);
+    particle.style.setProperty('--duration',`${5+Math.random()*5}s`);
+    particle.style.setProperty('--size',`${2+Math.random()*4}px`);
+    host.append(particle);
+  }
+}
+function setRevealStage(stage){
+  $$('.reveal-stage').forEach(el=>el.classList.toggle('visible',el.id===stage));
+}
+function renderFinalStandings(settings){
+  const leaderboard=Array.isArray(settings.leaderboard)?settings.leaderboard:[];
+  const podiumOrder=[leaderboard[1],leaderboard[0],leaderboard[2]].filter(Boolean);
+  const podium=$('#podium');
+  podium.innerHTML=podiumOrder.map(player=>`
+    <article class="podium-card rank-${player.rank}">
+      <span class="podium-rank">${player.rank===1?'♛':`#${player.rank}`}</span>
+      <small>${escReveal(player.department||'—')}</small>
+      <h3>${escReveal(player.name||'Unnamed')}</h3>
+      <strong>${Number(player.overall||0).toFixed(1)}</strong>
+      <em>POINTS</em>
+    </article>`).join('');
+  const table=$('#final-leaderboard');
+  table.innerHTML=leaderboard.map(player=>`
+    <div class="final-row ${player.rank<=3?'top-three':''}">
+      <span class="final-rank">${player.rank===1?'♛':String(player.rank).padStart(2,'0')}</span>
+      <div><strong>${escReveal(player.name||'Unnamed')}</strong><small>${escReveal(player.department||'—')} · ${Number(player.gamesPlayed||0)}/5 PLAYED</small></div>
+      <b>${Number(player.overall||0).toFixed(1)}</b>
+    </div>`).join('')||'<p class="empty-results">No official standings were recorded.</p>';
+}
+function launchChampionReveal(settings){
+  if(revealStarted)return;
+  revealStarted=true;
+  stopTournamentActivity();
+  makeRevealParticles();
+  $('#champion-name').textContent=settings.championName||'CHAMPION';
+  $('#champion-department').textContent=settings.championDepartment||'—';
+  $('#champion-score').textContent=`${Number(settings.championScore||0).toFixed(1)} PTS`;
+  renderFinalStandings(settings);
+  show('champion-screen',true);
+  document.body.classList.add('reveal-mode');
+  setRevealStage('reveal-sync');
+  setTimeout(()=>{
+    setRevealStage('reveal-intro');
+    const countdown=$('#reveal-countdown');
+    let count=3;
+    countdown.textContent=count;
+    const timer=setInterval(()=>{
+      count--;
+      if(count>0){countdown.textContent=count;countdown.classList.remove('pop');void countdown.offsetWidth;countdown.classList.add('pop')}
+      else{clearInterval(timer);countdown.textContent='';setTimeout(()=>setRevealStage('reveal-winner'),350)}
+    },900);
+  },2800);
+}
+$('#view-results-btn').addEventListener('click',()=>setRevealStage('reveal-standings'));
+
 function setupPlayer(){if(!state.player)return; $('#welcome-name').textContent=state.player.name;$('#welcome-department').textContent=state.player.department;$('#cup-id').textContent=state.player.id;$('#hub-id').textContent=state.player.id;$('#complete-id').textContent=state.player.id;$('#complete-name').textContent=state.player.name.toUpperCase();}
 function renderHub(){setupPlayer();const grid=$('#challenge-grid');grid.innerHTML='';games.forEach((g,i)=>{const done=state.completed.includes(g.id),ready=!done&&i===state.completed.length;const card=document.createElement('article');card.className=`challenge-card ${done?'completed':ready?'unlocked':'locked'}`;card.innerHTML=`<div class="challenge-top"><span>CHALLENGE ${g.num}</span><em>${done?'COMPLETE':ready?'READY':'LOCKED'}</em></div><div class="challenge-icon">${g.icon}</div><h3>${g.title}</h3><p>${g.desc}</p><button class="card-btn" ${ready?'':'disabled'}>${done?'COMPLETED':ready?'PLAY CHALLENGE':'LOCKED'}</button>`;if(ready)card.querySelector('button').addEventListener('click',()=>openMission(g.id));grid.append(card)});const p=state.completed.length/5*100;$('#progress-fill').style.width=p+'%';$('#progress-label').textContent=`${state.completed.length} / 5`;}
 function openMission(id){activeGame=id;const g=games.find(x=>x.id===id);$('#mission-number').textContent=`CHALLENGE ${g.num}`;$('#mission-icon').textContent=g.icon;$('#mission-title').textContent=g.title;$('#mission-description').textContent=g.desc;$('#mission-rules').innerHTML=g.rules.map(r=>`<span>${r}</span>`).join('');show('mission-screen')}

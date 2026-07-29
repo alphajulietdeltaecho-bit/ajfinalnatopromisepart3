@@ -39,6 +39,43 @@
     <section class="screen" id="result-screen"><div class="panel narrow center"><div class="success-ring">✓</div><p class="eyebrow">CHALLENGE COMPLETE</p><h2 id="result-title">Mission Cleared</h2><p class="section-copy" id="result-copy">Your official result has been recorded.</p><button class="primary-btn" id="return-hub-btn"><span>RETURN TO HUB</span><b>→</b></button></div></section>
 
     <section class="screen" id="complete-screen"><div class="panel narrow center completion"><div class="cup-mark"><span></span><i></i><span></span></div><p class="eyebrow">TOURNAMENT COMPLETE</p><h2>Five challenges cleared.</h2><p class="section-copy">Your official James Allen Cup attempt has been recorded. Final scores remain hidden until the Champion Reveal.</p><div class="id-card"><small>COMPETITOR</small><strong id="complete-id">JC-0000</strong><span id="complete-name">PLAYER</span></div><p class="tagline small">One Champion will be revealed.</p></div></section>
+
+    <section class="screen reveal-screen" id="champion-screen" aria-live="polite">
+      <div class="reveal-particles" id="reveal-particles" aria-hidden="true"></div>
+      <div class="reveal-stage reveal-sync" id="reveal-sync">
+        <p class="eyebrow">TOURNAMENT CONTROL</p>
+        <div class="sync-icon"><i></i><i></i><i></i></div>
+        <h2>Synchronizing Results</h2>
+        <p>Official tournament data has been locked.</p>
+        <div class="sync-bar"><span></span></div>
+      </div>
+
+      <div class="reveal-stage reveal-intro" id="reveal-intro">
+        <div class="cup-mark"><span></span><i></i><span></span></div>
+        <p class="eyebrow">THE JAMES ALLEN CUP 2026</p>
+        <h2>The Champion Is...</h2>
+        <div class="reveal-countdown" id="reveal-countdown">3</div>
+      </div>
+
+      <div class="reveal-stage reveal-winner" id="reveal-winner">
+        <div class="winner-crown" aria-hidden="true">♛</div>
+        <p class="eyebrow">JAMES ALLEN CUP 2026 CHAMPION</p>
+        <h2 id="champion-name">CHAMPION</h2>
+        <p class="winner-meta"><span id="champion-department">—</span><b>•</b><span id="champion-score">0.0 PTS</span></p>
+        <div class="winner-cup" aria-hidden="true"><span></span><i></i><span></span></div>
+        <button class="primary-btn reveal-results-btn" id="view-results-btn"><span>VIEW FINAL STANDINGS</span><b>→</b></button>
+      </div>
+
+      <div class="reveal-stage reveal-standings" id="reveal-standings">
+        <div class="standings-head">
+          <div><p class="eyebrow">OFFICIAL RESULTS</p><h2>Final Standings</h2></div>
+          <div class="results-lock">RESULTS LOCKED</div>
+        </div>
+        <div class="podium" id="podium"></div>
+        <div class="final-table" id="final-leaderboard"></div>
+        <p class="results-note">The James Allen Cup 2026 • Official Friday Funday Competition</p>
+      </div>
+    </section>
   </main>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
