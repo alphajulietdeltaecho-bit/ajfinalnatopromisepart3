@@ -1,3 +1,19 @@
+const firebaseConfig = {
+  apiKey: "AIzaSyCC2Jp6uz0tLFpUwRzHABPGcg1JP4H0xkg",
+  authDomain: "james-allen-cup-2026.firebaseapp.com",
+  projectId: "james-allen-cup-2026",
+  storageBucket: "james-allen-cup-2026.firebasestorage.app",
+  messagingSenderId: "131020097886",
+  appId: "1:131020097886:web:fcc0861bc195629780a7cf"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+let firebaseUser = null;
+let cloudReady = false;
+let saveQueue = Promise.resolve();
+
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const screens=$$('.screen');
 const games=[
@@ -8,18 +24,93 @@ const games=[
  {id:'sequence',num:'V',icon:'◆',title:'Sequence Recall',desc:'Watch and repeat increasingly long tile sequences across nine levels.',rules:['9 LEVELS','LONGER EACH ROUND','ONE LIFE PER LEVEL']}
 ];
 const defaultState={player:null,completed:[],scores:{},briefed:false};
-let state=JSON.parse(localStorage.getItem('jacPhase1')||'null')||structuredClone(defaultState);
+let state=JSON.parse(localStorage.getItem('jacPhase2')||localStorage.getItem('jacPhase1')||'null')||structuredClone(defaultState);
 let activeGame=null;
-function save(){localStorage.setItem('jacPhase1',JSON.stringify(state))}
+function save(){
+  localStorage.setItem('jacPhase2',JSON.stringify(state));
+  if(!cloudReady||!firebaseUser||!state.player)return;
+  const finished=state.completed.length===games.length;
+  const payload={
+    uid:firebaseUser.uid,
+    name:state.player.name,
+    department:state.player.department,
+    cupID:state.player.id,
+    briefed:Boolean(state.briefed),
+    completedGames:[...state.completed],
+    games:{...state.scores},
+    completed:finished,
+    updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+  };
+  if(finished)payload.completedAt=firebase.firestore.FieldValue.serverTimestamp();
+  saveQueue=saveQueue.then(()=>db.collection('players').doc(firebaseUser.uid).set(payload,{merge:true})).catch(err=>console.error('Firestore save failed:',err));
+}
+
+function registrationKey(name,department){
+  const raw=`${name.trim().toLowerCase().replace(/\s+/g,' ')}|${department.trim().toLowerCase()}`;
+  let hash=2166136261;
+  for(let i=0;i<raw.length;i++){hash^=raw.charCodeAt(i);hash=Math.imul(hash,16777619)}
+  return `r_${(hash>>>0).toString(36)}`;
+}
+
+async function loadCloudState(){
+  const snap=await db.collection('players').doc(firebaseUser.uid).get();
+  if(!snap.exists)return;
+  const data=snap.data();
+  state={
+    player:{name:data.name,department:data.department,id:data.cupID},
+    completed:Array.isArray(data.completedGames)?data.completedGames:[],
+    scores:data.games||{},
+    briefed:Boolean(data.briefed)
+  };
+  localStorage.setItem('jacPhase2',JSON.stringify(state));
+  setupPlayer();
+  if(state.briefed)renderHub();
+}
+
+const firebaseReady=(async()=>{
+  const credential=await auth.signInAnonymously();
+  firebaseUser=credential.user;
+  cloudReady=true;
+  await loadCloudState();
+  return firebaseUser;
+})().catch(err=>{
+  console.error('Firebase initialization failed:',err);
+  cloudReady=false;
+  return null;
+});
 function show(id){screens.forEach(s=>s.classList.toggle('active',s.id===id));window.scrollTo({top:0,behavior:'smooth'})}
 function cupId(){const a='ABCDEFGHJKLMNPQRSTUVWXYZ';return `${a[Math.floor(Math.random()*a.length)]}${a[Math.floor(Math.random()*a.length)]}-${Math.floor(1000+Math.random()*9000)}`}
 function setupPlayer(){if(!state.player)return; $('#welcome-name').textContent=state.player.name;$('#welcome-department').textContent=state.player.department;$('#cup-id').textContent=state.player.id;$('#hub-id').textContent=state.player.id;$('#complete-id').textContent=state.player.id;$('#complete-name').textContent=state.player.name.toUpperCase();}
 function renderHub(){setupPlayer();const grid=$('#challenge-grid');grid.innerHTML='';games.forEach((g,i)=>{const done=state.completed.includes(g.id),ready=!done&&i===state.completed.length;const card=document.createElement('article');card.className=`challenge-card ${done?'completed':ready?'unlocked':'locked'}`;card.innerHTML=`<div class="challenge-top"><span>CHALLENGE ${g.num}</span><em>${done?'COMPLETE':ready?'READY':'LOCKED'}</em></div><div class="challenge-icon">${g.icon}</div><h3>${g.title}</h3><p>${g.desc}</p><button class="card-btn" ${ready?'':'disabled'}>${done?'COMPLETED':ready?'PLAY CHALLENGE':'LOCKED'}</button>`;if(ready)card.querySelector('button').addEventListener('click',()=>openMission(g.id));grid.append(card)});const p=state.completed.length/5*100;$('#progress-fill').style.width=p+'%';$('#progress-label').textContent=`${state.completed.length} / 5`;}
 function openMission(id){activeGame=id;const g=games.find(x=>x.id===id);$('#mission-number').textContent=`CHALLENGE ${g.num}`;$('#mission-icon').textContent=g.icon;$('#mission-title').textContent=g.title;$('#mission-description').textContent=g.desc;$('#mission-rules').innerHTML=g.rules.map(r=>`<span>${r}</span>`).join('');show('mission-screen')}
 function completeGame(id,score,copy){if(!state.completed.includes(id))state.completed.push(id);state.scores[id]=score;save();$('#result-title').textContent=games.find(g=>g.id===id).title+' Cleared';$('#result-copy').textContent=copy||'Your official result has been recorded.';show('result-screen')}
-$('#enter-cup-btn').addEventListener('click',()=>{if(state.player){setupPlayer();show(state.completed.length===5?'complete-screen':'hub-screen')}else show('register-screen')});
+$('#enter-cup-btn').addEventListener('click',async()=>{
+  await firebaseReady;
+  if(state.player){setupPlayer();show(state.completed.length===5?'complete-screen':'hub-screen')}else show('register-screen')
+});
 $$('[data-go]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.go)));
-$('#register-btn').addEventListener('click',()=>{const name=$('#full-name').value.trim(),dept=$('#department').value;if(name.length<2||!dept){$('#register-error').textContent='Enter your full name and select your department.';return}state.player={name,department:dept,id:cupId()};save();setupPlayer();show('id-screen')});
+$('#register-btn').addEventListener('click',async()=>{
+  const name=$('#full-name').value.trim(),dept=$('#department').value;
+  const error=$('#register-error');
+  if(name.length<2||!dept){error.textContent='Enter your full name and select your department.';return}
+  error.textContent='Connecting...';
+  await firebaseReady;
+  if(!firebaseUser){error.textContent='Unable to connect. Check your internet and try again.';return}
+  const regRef=db.collection('registrations').doc(registrationKey(name,dept));
+  try{
+    const existing=await regRef.get();
+    if(existing.exists&&existing.data().ownerUid!==firebaseUser.uid){error.textContent='This competitor is already registered.';return}
+    const newPlayer={name,department:dept,id:cupId()};
+    const playerRef=db.collection('players').doc(firebaseUser.uid);
+    const batch=db.batch();
+    if(!existing.exists)batch.set(regRef,{ownerUid:firebaseUser.uid,name,department:dept,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    batch.set(playerRef,{uid:firebaseUser.uid,name,department:dept,cupID:newPlayer.id,registeredAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp(),briefed:false,completedGames:[],games:{},completed:false});
+    await batch.commit();
+    state=structuredClone(defaultState);state.player=newPlayer;
+    localStorage.setItem('jacPhase2',JSON.stringify(state));
+    error.textContent='';setupPlayer();show('id-screen');
+  }catch(err){console.error(err);error.textContent='Registration failed. Refresh and try again.'}
+});
 $('#continue-briefing-btn').addEventListener('click',()=>show('briefing-screen'));
 $('#begin-btn').addEventListener('click',()=>{state.briefed=true;save();renderHub();show('hub-screen')});
 $('#return-hub-btn').addEventListener('click',()=>{if(state.completed.length===5){setupPlayer();show('complete-screen')}else{renderHub();show('hub-screen')}});
@@ -56,3 +147,4 @@ function sequencePress(i,b){if(!sr||sr.locked)return;b.classList.add('active');s
 function nextSequenceLevel(){if(sr.level===9){completeGame('sequence',{score:sr.score},`Sequence recall score: ${sr.score}.`)}else{sr.level++;sequenceLevel()}}
 
 setupPlayer();if(state.player&&state.briefed){renderHub()}
+firebaseReady.then(()=>{setupPlayer();if(state.player&&state.briefed)renderHub()});
