@@ -53,6 +53,38 @@ $('#export-btn').addEventListener('click',exportCSV);
 $('#dialog-close').addEventListener('click',()=>$('#player-dialog').close());
 
 function beginLiveData(){if(unsubscribe)unsubscribe();unsubscribe=db.collection('players').orderBy('registeredAt','asc').onSnapshot(s=>{players=s.docs.map(d=>({docId:d.id,...d.data()}));$('#live-status').textContent='● LIVE';render()},err=>{console.error(err);$('#live-status').textContent='● ACCESS ERROR';$('#players-body').innerHTML='<tr><td colspan="7" class="empty">Firestore access denied. Publish the supplied security rules.</td></tr>'})}
+
+function beginTournamentSettings(){
+  if(settingsUnsubscribe) settingsUnsubscribe();
+
+  const tournamentRef=db.collection('settings').doc('tournament');
+
+  settingsUnsubscribe=tournamentRef.onSnapshot(async snapshot=>{
+    if(!snapshot.exists){
+      await tournamentRef.set({
+        revealed:false,
+        locked:false,
+        championId:null,
+        championName:null,
+        championScore:null,
+        leaderboard:[],
+        createdAt:firebase.firestore.FieldValue.serverTimestamp()
+      });
+      return;
+    }
+
+    tournamentSettings={
+      revealed:false,
+      locked:false,
+      ...snapshot.data()
+    };
+
+    updateRevealButton();
+    renderLeaderboard();
+  },error=>{
+    console.error('Tournament settings error:',error);
+  });
+}
 auth.onAuthStateChanged(user => {
   const admin = Boolean(
     user &&
