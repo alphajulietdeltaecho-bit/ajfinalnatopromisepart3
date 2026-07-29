@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex,nofollow">
+  <title>James Allen Cup 2026 — Admin</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <main>
+    <section id="login-view" class="auth-shell">
+      <div class="auth-card">
+        <p class="eyebrow">THE JAMES ALLEN CUP 2026</p>
+        <h1>Admin Control Center</h1>
+        <p class="muted">Sign in with the Firebase Email/Password admin account you created.</p>
+        <form id="login-form">
+          <label>Email<input id="admin-email" type="email" autocomplete="username" required></label>
+          <label>Password<input id="admin-password" type="password" autocomplete="current-password" required></label>
+          <button id="login-btn" type="submit">SIGN IN</button>
+          <p id="login-error" class="error" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+
+    <section id="dashboard-view" class="dashboard hidden">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">FRIDAY FUNDAY — 2026 EDITION</p>
+          <h1>James Allen Cup Admin</h1>
+        </div>
+        <div class="top-actions">
+          <span id="live-status" class="live-pill">● LIVE</span>
+          <button id="export-btn" class="secondary">EXPORT CSV</button>
+          <button id="logout-btn" class="secondary">SIGN OUT</button>
+        </div>
+      </header>
+
+      <section class="metrics" aria-label="Tournament summary">
+        <article><span>REGISTERED</span><strong id="metric-registered">0</strong></article>
+        <article><span>IN PROGRESS</span><strong id="metric-progress">0</strong></article>
+        <article><span>COMPLETED</span><strong id="metric-completed">0</strong></article>
+        <article><span>COMPLETION RATE</span><strong id="metric-rate">0%</strong></article>
+      </section>
+
+      <section class="controls">
+        <label>Search<input id="search-input" type="search" placeholder="Name or Cup ID"></label>
+        <label>Department<select id="department-filter"><option value="ALL">All departments</option><option>OPS</option><option>FNB</option><option>ACCOUNTS</option><option>BD</option><option>IT</option></select></label>
+        <label>Status<select id="status-filter"><option value="ALL">All statuses</option><option value="COMPLETED">Completed</option><option value="IN_PROGRESS">In progress</option><option value="REGISTERED">Registered only</option></select></label>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading"><div><p class="eyebrow">LIVE PLAYERS</p><h2>Competitor Progress</h2></div><span id="visible-count">0 shown</span></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Cup ID</th><th>Competitor</th><th>Dept</th><th>Progress</th><th>Status</th><th>Last update</th><th></th></tr></thead>
+            <tbody id="players-body"><tr><td colspan="7" class="empty">Waiting for Firebase data…</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading"><div><p class="eyebrow">ADMIN ONLY</p><h2>Hidden Leaderboard</h2></div><span>Completed players only</span></div>
+        <p class="formula-note">Overall score is the average of five normalized challenge scores. This ranking remains hidden from participants.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Rank</th><th>Competitor</th><th>Dept</th><th>Overall</th><th>Reaction</th><th>Typing</th><th>Memory</th><th>Deadeye</th><th>Sequence</th></tr></thead>
+            <tbody id="leaderboard-body"><tr><td colspan="9" class="empty">No completed competitors yet.</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="player-dialog">
+    <div class="dialog-head"><div><p class="eyebrow">COMPETITOR DETAILS</p><h2 id="dialog-name">Player</h2></div><button id="dialog-close" aria-label="Close">×</button></div>
+    <div id="dialog-content"></div>
+  </dialog>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
