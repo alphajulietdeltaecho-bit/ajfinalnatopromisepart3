@@ -1,1 +1,0 @@
-Galingan hehe
