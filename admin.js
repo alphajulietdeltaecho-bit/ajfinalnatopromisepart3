@@ -13,7 +13,7 @@ let tournamentSettings = {
 const clamp=(n,min=0,max=100)=>Math.max(min,Math.min(max,Number(n)||0));
 const dateText=v=>v?.toDate?new Intl.DateTimeFormat('en-PH',{dateStyle:'medium',timeStyle:'short'}).format(v.toDate()):'—';
 const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-function challengeScores(p){const g=p.games||{};const typing=clamp(clamp((g.typing?.wpm||0)/100*100)*.7+clamp(g.typing?.accuracy||0)*.3);const duration=g.deadeye?.duration||60;const aimSpeed=clamp((35-duration)/27*100);const deadeye=clamp(clamp((g.deadeye?.hits||0)/30*100)*.55+clamp((g.deadeye?.maxCombo||0)/30*100)*.25+aimSpeed*.20);const mineTime=g.minesweeper?.time||120;const minesweeper=clamp((100-mineTime)/75*100);const memoryTime=g.memory?.time||120,memoryMoves=g.memory?.moves||40;const memory=clamp(clamp((75-memoryTime)/55*100)*.65+clamp((32-memoryMoves)/20*100)*.35);const coffee=clamp(clamp((g.coffee?.served||0)/18*100)*.65+clamp(g.coffee?.accuracy||0)*.20+clamp((g.coffee?.maxCombo||0)/10*100)*.15);return{typing,deadeye,minesweeper,memory,coffee,overall:(typing+deadeye+minesweeper+memory+coffee)/5}}
+function challengeScores(p){const g=p.games||{};const memoryTime=g.memory?.time||120,memoryMoves=g.memory?.moves||40;const memory=clamp(clamp((75-memoryTime)/55*100)*.65+clamp((32-memoryMoves)/20*100)*.35);const duration=g.deadeye?.duration||60;const aimSpeed=clamp((35-duration)/27*100);const deadeye=clamp(clamp((g.deadeye?.hits||0)/30*100)*.55+clamp((g.deadeye?.maxCombo||0)/30*100)*.25+aimSpeed*.20);const typing=clamp(clamp((g.typing?.wpm||0)/100*100)*.7+clamp(g.typing?.accuracy||0)*.3);const stack=clamp(clamp((g.stack?.height||0)/35*100)*.55+clamp((g.stack?.perfects||0)/12*100)*.20+clamp((g.stack?.score||0)/5500*100)*.25);const sequence=clamp((g.sequence?.score||0)/63*100);return{memory,deadeye,typing,stack,sequence,overall:(memory+deadeye+typing+stack+sequence)/5}}
 function getRankedPlayers() {
   return players
     .filter(p => (p.completedGames || []).length > 0)
@@ -150,7 +150,7 @@ function renderLeaderboard() {
           </td>
 
           <td class="score">
-            ${p.scoreSet.typing.toFixed(1)}
+            ${p.scoreSet.memory.toFixed(1)}
           </td>
 
           <td class="score">
@@ -158,15 +158,15 @@ function renderLeaderboard() {
           </td>
 
           <td class="score">
-            ${p.scoreSet.minesweeper.toFixed(1)}
+            ${p.scoreSet.typing.toFixed(1)}
           </td>
 
           <td class="score">
-            ${p.scoreSet.memory.toFixed(1)}
+            ${p.scoreSet.stack.toFixed(1)}
           </td>
 
           <td class="score">
-            ${p.scoreSet.coffee.toFixed(1)}
+            ${p.scoreSet.sequence.toFixed(1)}
           </td>
         </tr>
       `).join('')
@@ -180,7 +180,7 @@ function renderLeaderboard() {
 
   updateRevealButton();
 }
-function openPlayer(id){const p=players.find(x=>x.docId===id);if(!p)return;const g=p.games||{},s=challengeScores(p);$('#dialog-name').textContent=p.name||'Player';$('#dialog-content').innerHTML=`<div class="detail-meta"><div class="detail-box"><small>CUP ID</small><strong>${esc(p.cupID||'—')}</strong></div><div class="detail-box"><small>DEPARTMENT</small><strong>${esc(p.department||'—')}</strong></div><div class="detail-box"><small>PROGRESS</small><strong>${(p.completedGames||[]).length} / 5</strong></div><div class="detail-box"><small>OVERALL NORMALIZED</small><strong>${s.overall.toFixed(1)}</strong></div></div><div class="game-grid"><div class="detail-box"><small>TYPING RUSH</small><strong>${g.typing?`${esc(g.typing.wpm)} WPM · ${esc(g.typing.accuracy)}%`:'Not completed'}</strong></div><div class="detail-box"><small>AIM TRAINER</small><strong>${g.deadeye?`${esc(g.deadeye.hits)} hits · ${esc(g.deadeye.misses)} misses · combo ${esc(g.deadeye.maxCombo)}`:'Not completed'}</strong></div><div class="detail-box"><small>MINESWEEPER SPRINT</small><strong>${g.minesweeper?`${esc(g.minesweeper.time)} sec · ${esc(g.minesweeper.mineHits)} mine hits`:'Not completed'}</strong></div><div class="detail-box"><small>MEMORY CARDS</small><strong>${g.memory?`${esc(g.memory.time)} sec · ${esc(g.memory.moves)} moves`:'Not completed'}</strong></div><div class="detail-box"><small>COFFEE RUSH</small><strong>${g.coffee?`${esc(g.coffee.served)} served · ${esc(g.coffee.accuracy)}% · combo ${esc(g.coffee.maxCombo)}`:'Not completed'}</strong></div><div class="detail-box"><small>LAST UPDATE</small><strong>${esc(dateText(p.updatedAt||p.registeredAt))}</strong></div></div>`;$('#player-dialog').showModal()}
+function openPlayer(id){const p=players.find(x=>x.docId===id);if(!p)return;const g=p.games||{},s=challengeScores(p);$('#dialog-name').textContent=p.name||'Player';$('#dialog-content').innerHTML=`<div class="detail-meta"><div class="detail-box"><small>CUP ID</small><strong>${esc(p.cupID||'—')}</strong></div><div class="detail-box"><small>DEPARTMENT</small><strong>${esc(p.department||'—')}</strong></div><div class="detail-box"><small>PROGRESS</small><strong>${(p.completedGames||[]).length} / 5</strong></div><div class="detail-box"><small>OVERALL NORMALIZED</small><strong>${s.overall.toFixed(1)}</strong></div></div><div class="game-grid"><div class="detail-box"><small>MEMORY CARDS</small><strong>${g.memory?`${esc(g.memory.time)} sec · ${esc(g.memory.moves)} moves`:'Not completed'}</strong></div><div class="detail-box"><small>AIM TRAINER</small><strong>${g.deadeye?`${esc(g.deadeye.hits)} hits · ${esc(g.deadeye.misses)} misses · combo ${esc(g.deadeye.maxCombo)}`:'Not completed'}</strong></div><div class="detail-box"><small>TYPING RUSH</small><strong>${g.typing?`${esc(g.typing.wpm)} WPM · ${esc(g.typing.accuracy)}%`:'Not completed'}</strong></div><div class="detail-box"><small>STACK TOWER</small><strong>${g.stack?`${esc(g.stack.height)} blocks · ${esc(g.stack.perfects)} perfects · ${esc(g.stack.score)} score`:'Not completed'}</strong></div><div class="detail-box"><small>SEQUENCE RECALL</small><strong>${g.sequence?`${esc(g.sequence.score)} / 63 · ${esc(g.sequence.correctLevels)} perfect levels`:'Not completed'}</strong></div><div class="detail-box"><small>LAST UPDATE</small><strong>${esc(dateText(p.updatedAt||p.registeredAt))}</strong></div></div>`;$('#player-dialog').showModal()}
 function updateRevealButton() {
   const button = $('#reveal-btn');
 
@@ -245,11 +245,11 @@ async function revealChampion() {
       department: player.department || '',
       gamesPlayed: player.gamesPlayed,
       overall: Number(player.scoreSet.overall.toFixed(2)),
-      typing: Number(player.scoreSet.typing.toFixed(2)),
-      deadeye: Number(player.scoreSet.deadeye.toFixed(2)),
-      minesweeper: Number(player.scoreSet.minesweeper.toFixed(2)),
       memory: Number(player.scoreSet.memory.toFixed(2)),
-      coffee: Number(player.scoreSet.coffee.toFixed(2))
+      deadeye: Number(player.scoreSet.deadeye.toFixed(2)),
+      typing: Number(player.scoreSet.typing.toFixed(2)),
+      stack: Number(player.scoreSet.stack.toFixed(2)),
+      sequence: Number(player.scoreSet.sequence.toFixed(2))
     }));
 
   try {
@@ -296,4 +296,4 @@ $('#reveal-btn').addEventListener(
   'click',
   revealChampion
 );
-function exportCSV(){const headers=['Cup ID','Name','Department','Completed Games','Status','Typing WPM','Typing Accuracy','Aim Hits','Aim Misses','Aim Max Combo','Aim Duration','Minesweeper Time','Mine Hits','Memory Time','Memory Moves','Coffee Served','Coffee Accuracy','Coffee Max Combo','Normalized Overall','Registered At','Updated At'];const rows=players.map(p=>{const g=p.games||{},scores=challengeScores(p);return[p.cupID,p.name,p.department,(p.completedGames||[]).length,statusOf(p)[1],g.typing?.wpm,g.typing?.accuracy,g.deadeye?.hits,g.deadeye?.misses,g.deadeye?.maxCombo,g.deadeye?.duration,g.minesweeper?.time,g.minesweeper?.mineHits,g.memory?.time,g.memory?.moves,g.coffee?.served,g.coffee?.accuracy,g.coffee?.maxCombo,scores.overall.toFixed(1),dateText(p.registeredAt),dateText(p.updatedAt)]});const csv=[headers,...rows].map(row=>row.map(value=>`"${String(value??'').replace(/"/g,'""')}"`).join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`James-Allen-Cup-Season-4-${new Date().toISOString().slice(0,10)}.csv`;a.click();URL.revokeObjectURL(url)}
+function exportCSV(){const headers=['Cup ID','Name','Department','Completed Games','Status','Memory Time','Memory Moves','Aim Hits','Aim Misses','Aim Max Combo','Aim Duration','Typing WPM','Typing Accuracy','Stack Height','Stack Perfects','Stack Score','Sequence Score','Sequence Correct Levels','Normalized Overall','Registered At','Updated At'];const rows=players.map(p=>{const g=p.games||{},scores=challengeScores(p);return[p.cupID,p.name,p.department,(p.completedGames||[]).length,statusOf(p)[1],g.memory?.time,g.memory?.moves,g.deadeye?.hits,g.deadeye?.misses,g.deadeye?.maxCombo,g.deadeye?.duration,g.typing?.wpm,g.typing?.accuracy,g.stack?.height,g.stack?.perfects,g.stack?.score,g.sequence?.score,g.sequence?.correctLevels,scores.overall.toFixed(1),dateText(p.registeredAt),dateText(p.updatedAt)]});const csv=[headers,...rows].map(row=>row.map(value=>`"${String(value??'').replace(/"/g,'""')}"`).join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`James-Allen-Cup-Season-4-${new Date().toISOString().slice(0,10)}.csv`;a.click();URL.revokeObjectURL(url)}

@@ -1,0 +1,31 @@
+THE JAMES ALLEN CUP — SEASON 4 REBUILD
+
+Final challenge order:
+1. Memory Cards
+2. Aim Trainer
+3. Typing Rush
+4. Stack Tower
+5. Sequence Recall
+
+Removed completely:
+- Minesweeper Sprint
+- Coffee Rush
+
+Updated:
+- Player progression and challenge screens
+- Firestore game result keys
+- Admin normalized scoring
+- Hidden leaderboard columns
+- Player detail dialog
+- Champion reveal snapshot
+- CSV export
+
+New result keys:
+- games.memory
+- games.deadeye
+- games.typing
+- games.stack
+- games.sequence
+
+Recommended before launch:
+Delete old test documents in the Firestore players collection so no previous lineup data remains.
