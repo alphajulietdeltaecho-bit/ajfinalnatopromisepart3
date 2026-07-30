@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#08090b" />
-  <title>The James Allen Cup 2026</title>
+  <title>The James Allen Cup — Season 4</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
@@ -12,17 +12,17 @@
 </head>
 <body>
   <div class="noise"></div><div class="grid-bg"></div>
-  <header class="topbar"><div class="brand-mini">FRIDAY FUNDAY</div><div class="season-chip">2026 EDITION</div></header>
+  <header class="topbar"><div class="brand-mini">FRIDAY FUNDAY</div><div class="season-chip">SEASON 4</div></header>
   <main id="app">
-    <section class="screen active" id="landing-screen"><div class="hero"><p class="eyebrow">FRIDAY FUNDAY PRESENTS</p><div class="cup-mark"><span></span><i></i><span></span></div><h1><span>THE</span>JAMES ALLEN CUP<strong>2026</strong></h1><p class="tagline">Five Challenges. One Champion.</p><button class="primary-btn" id="enter-cup-btn"><span>ENTER THE CUP</span><b>→</b></button><p class="microcopy">Official Friday Funday competition platform</p></div></section>
+    <section class="screen active" id="landing-screen"><div class="hero"><p class="eyebrow">FRIDAY FUNDAY PRESENTS</p><div class="cup-mark"><span></span><i></i><span></span></div><h1>THE JAMES ALLEN CUP<strong>FRIDAY FUNDAY</strong><em>SEASON 4</em></h1><p class="tagline">Five Challenges. One Champion.</p><button class="primary-btn" id="enter-cup-btn"><span>ENTER THE CUP</span><b>→</b></button><p class="microcopy">Official Friday Funday competition platform</p></div></section>
 
-    <section class="screen" id="register-screen"><div class="panel narrow"><div class="section-kicker">COMPETITOR REGISTRATION</div><h2>Enter the Cup</h2><p class="section-copy">Register once. Your Cup ID will be generated automatically.</p><div class="form-grid"><label><span>Full Name</span><input id="full-name" type="text" autocomplete="name" placeholder="Enter your full name" maxlength="70" /></label><label><span>Department</span><select id="department"><option value="">Select department</option><option>OPS</option><option>FNB</option><option>ACCOUNTS</option><option>BD</option><option>IT</option></select></label><p class="error-text" id="register-error" aria-live="polite"></p><button class="primary-btn full" id="register-btn"><span>GENERATE CUP ID</span><b>→</b></button></div><button class="text-btn" data-go="landing-screen">← Back</button></div></section>
+    <section class="screen" id="register-screen"><div class="panel narrow"><div class="section-kicker">COMPETITOR REGISTRATION</div><h2>Enter the Cup</h2><p class="section-copy">Register once. Your Cup ID will be generated automatically.</p><div class="form-grid"><label><span>Full Name</span><input id="full-name" type="text" autocomplete="name" placeholder="Enter your full name" maxlength="70" /></label><label><span>Department</span><select id="department"><option value="">Select department</option><option>OPS</option><option>HQ</option><option>ACCOUNTS</option><option>BD</option><option>IT</option></select></label><p class="error-text" id="register-error" aria-live="polite"></p><button class="primary-btn full" id="register-btn"><span>GENERATE CUP ID</span><b>→</b></button></div><button class="text-btn" data-go="landing-screen">← Back</button></div></section>
 
     <section class="screen" id="id-screen"><div class="panel narrow center"><div class="scanner"></div><p class="eyebrow">REGISTRATION CONFIRMED</p><h2>Welcome, <span id="welcome-name">Competitor</span></h2><div class="id-card"><small>YOUR CUP ID</small><strong id="cup-id">JC-0000</strong><span id="welcome-department">DEPARTMENT</span></div><p class="section-copy">Keep this ID. It identifies your tournament entry.</p><button class="primary-btn" id="continue-briefing-btn"><span>CONTINUE</span><b>→</b></button></div></section>
 
     <section class="screen" id="briefing-screen"><div class="panel"><div class="section-kicker">CUP BRIEFING</div><h2>Competition Protocol</h2><div class="briefing-grid"><article><span>01</span><h3>Complete every challenge</h3><p>All five events contribute to your final tournament result.</p></article><article><span>02</span><h3>One official attempt</h3><p>Once a challenge is completed, it becomes permanently locked.</p></article><article><span>03</span><h3>Stay focused</h3><p>Each mission becomes more demanding as it progresses.</p></article><article><span>04</span><h3>Scores remain hidden</h3><p>Official results will only appear after the Game Master reveals them.</p></article></div><button class="primary-btn" id="begin-btn"><span>BEGIN THE CUP</span><b>→</b></button></div></section>
 
-    <section class="screen" id="hub-screen"><div class="hub-head"><div><p class="eyebrow">THE JAMES ALLEN CUP 2026</p><h2>Challenge Hub</h2></div><div class="player-chip"><small>COMPETITOR</small><strong id="hub-id">JC-0000</strong></div></div><div class="progress-row"><span>TOURNAMENT PROGRESS</span><div class="progress-track"><i id="progress-fill"></i></div><b id="progress-label">0 / 5</b></div><div class="challenge-grid" id="challenge-grid"></div></section>
+    <section class="screen" id="hub-screen"><div class="hub-head"><div><p class="eyebrow">THE JAMES ALLEN CUP · SEASON 4</p><h2>Challenge Hub</h2></div><div class="player-chip"><small>COMPETITOR</small><strong id="hub-id">JC-0000</strong></div></div><div class="progress-row"><span>TOURNAMENT PROGRESS</span><div class="progress-track"><i id="progress-fill"></i></div><b id="progress-label">0 / 5</b></div><div class="challenge-grid" id="challenge-grid"></div></section>
 
     <section class="screen" id="mission-screen"><div class="panel narrow center"><p class="eyebrow" id="mission-number">CHALLENGE I</p><div class="large-icon" id="mission-icon">⚡</div><h2 id="mission-title">Reflex Protocol</h2><p class="section-copy" id="mission-description"></p><div class="rules-strip" id="mission-rules"></div><button class="primary-btn" id="start-mission-btn"><span>START CHALLENGE</span><b>→</b></button><button class="text-btn" data-go="hub-screen">← Return to hub</button></div></section>
 
@@ -38,7 +38,7 @@
 
     <section class="screen" id="result-screen"><div class="panel narrow center"><div class="success-ring">✓</div><p class="eyebrow">CHALLENGE COMPLETE</p><h2 id="result-title">Mission Cleared</h2><p class="section-copy" id="result-copy">Your official result has been recorded.</p><button class="primary-btn" id="return-hub-btn"><span>RETURN TO HUB</span><b>→</b></button></div></section>
 
-    <section class="screen" id="complete-screen"><div class="panel narrow center completion"><div class="cup-mark"><span></span><i></i><span></span></div><p class="eyebrow">TOURNAMENT COMPLETE</p><h2>Five challenges cleared.</h2><p class="section-copy">Your official James Allen Cup attempt has been recorded. Final scores remain hidden until the Champion Reveal.</p><div class="id-card"><small>COMPETITOR</small><strong id="complete-id">JC-0000</strong><span id="complete-name">PLAYER</span></div><p class="tagline small">One Champion will be revealed.</p></div></section>
+    <section class="screen" id="complete-screen"><div class="panel narrow center completion"><div class="cup-mark"><span></span><i></i><span></span></div><p class="eyebrow">MISSION COMPLETE</p><h2>Congratulations!</h2><p class="section-copy">Your performance has been recorded successfully.</p><div class="reveal-wait"><small>WINNER REVEAL</small><strong>Today at 5:00 PM</strong><div class="completion-countdown" id="completion-countdown" aria-live="polite">00:00:00</div><span id="completion-countdown-label">Rankings remain classified until the official reveal.</span></div><div class="id-card"><small>COMPETITOR</small><strong id="complete-id">JC-0000</strong><span id="complete-name">PLAYER</span></div></div></section>
 
     <section class="screen reveal-screen" id="champion-screen" aria-live="polite">
       <div class="reveal-particles" id="reveal-particles" aria-hidden="true"></div>
@@ -52,14 +52,14 @@
 
       <div class="reveal-stage reveal-intro" id="reveal-intro">
         <div class="cup-mark"><span></span><i></i><span></span></div>
-        <p class="eyebrow">THE JAMES ALLEN CUP 2026</p>
+        <p class="eyebrow">THE JAMES ALLEN CUP · SEASON 4</p>
         <h2>The Champion Is...</h2>
         <div class="reveal-countdown" id="reveal-countdown">3</div>
       </div>
 
       <div class="reveal-stage reveal-winner" id="reveal-winner">
         <div class="winner-crown" aria-hidden="true">♛</div>
-        <p class="eyebrow">JAMES ALLEN CUP 2026 CHAMPION</p>
+        <p class="eyebrow">JAMES ALLEN CUP · SEASON 4 CHAMPION</p>
         <h2 id="champion-name">CHAMPION</h2>
         <p class="winner-meta"><span id="champion-department">—</span><b>•</b><span id="champion-score">0.0 PTS</span></p>
         <div class="winner-cup" aria-hidden="true"><span></span><i></i><span></span></div>
@@ -73,7 +73,7 @@
         </div>
         <div class="podium" id="podium"></div>
         <div class="final-table" id="final-leaderboard"></div>
-        <p class="results-note">The James Allen Cup 2026 • Official Friday Funday Competition</p>
+        <p class="results-note">The James Allen Cup • Friday Funday • Season 4</p>
       </div>
     </section>
   </main>
