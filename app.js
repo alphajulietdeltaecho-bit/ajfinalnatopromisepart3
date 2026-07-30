@@ -232,20 +232,216 @@ function finishMemoryCards(){if(!mcr)return;clearInterval(mcr.timer);const time=
 
 let str=null;
 function startStackTower(){
-  const canvas=$('#stack-canvas'),ctx=canvas.getContext('2d'),stage=$('#stack-stage'),overlay=$('#stack-overlay');
-  const fit=()=>{const rect=stage.getBoundingClientRect();canvas.style.width=rect.width+'px';canvas.style.height=Math.min(520,Math.max(390,rect.width*.68))+'px'};fit();
-  str={canvas,ctx,blocks:[{x:230,y:470,w:300,h:28}],moving:{x:40,y:442,w:300,h:28,dir:1,speed:3.2},height:0,perfects:0,combo:0,score:0,camera:0,started:false,over:false,last:performance.now(),raf:0,particles:[]};
-  $('#stack-height').textContent='0';$('#stack-perfects').textContent='0';$('#stack-combo').textContent='0';$('#stack-score').textContent='0';
-  overlay.classList.remove('hidden');show('stack-screen');drawStack();
+  show('stack-screen');
+
+  const canvas=$('#stack-canvas');
+  const stage=$('#stack-stage');
+  const overlay=$('#stack-overlay');
+  const ctx=canvas?.getContext('2d');
+  if(!canvas||!stage||!overlay||!ctx){
+    console.error('Stack Tower could not initialize: required elements are missing.');
+    return;
+  }
+
+  if(str?.raf)cancelAnimationFrame(str.raf);
+
+  // The screen must be visible before measuring the stage. Otherwise its width is 0.
+  const stageWidth=Math.max(320,Math.round(stage.getBoundingClientRect().width||760));
+  const viewWidth=Math.min(760,stageWidth);
+  const viewHeight=Math.round(Math.min(520,Math.max(390,viewWidth*.684)));
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+
+  canvas.width=Math.round(viewWidth*dpr);
+  canvas.height=Math.round(viewHeight*dpr);
+  canvas.style.width=viewWidth+'px';
+  canvas.style.height=viewHeight+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+
+  const margin=12;
+  const blockH=Math.max(24,Math.round(viewHeight*.054));
+  const baseW=Math.min(300,viewWidth-margin*4);
+  const baseX=(viewWidth-baseW)/2;
+  const baseY=viewHeight-blockH-24;
+
+  str={
+    canvas,ctx,viewWidth,viewHeight,dpr,
+    blocks:[{x:baseX,y:baseY,w:baseW,h:blockH}],
+    moving:{x:margin,y:baseY-blockH,w:baseW,h:blockH,dir:1,speed:3.2},
+    falling:[],particles:[],height:0,perfects:0,combo:0,maxCombo:0,
+    score:0,camera:0,started:false,over:false,last:performance.now(),raf:0
+  };
+
+  $('#stack-height').textContent='0';
+  $('#stack-perfects').textContent='0';
+  $('#stack-combo').textContent='0';
+  $('#stack-score').textContent='0';
+  overlay.classList.remove('hidden');
+  overlay.querySelector('strong').textContent='CLICK TO START';
+  overlay.querySelector('span').textContent='Then click again to place each moving block.';
+  drawStack();
   str.raf=requestAnimationFrame(stackLoop);
 }
-function stackLoop(now){if(!str||str.over)return;const dt=Math.min(2.2,(now-str.last)/16.67);str.last=now;if(str.started){const m=str.moving;m.x+=m.speed*m.dir*dt;if(m.x<8){m.x=8;m.dir=1}else if(m.x+m.w>str.canvas.width-8){m.x=str.canvas.width-8-m.w;m.dir=-1}str.particles.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=.35*dt;p.life-=dt});str.particles=str.particles.filter(p=>p.life>0)}drawStack();str.raf=requestAnimationFrame(stackLoop)}
-function drawStack(){if(!str)return;const {ctx,canvas}=str;ctx.clearRect(0,0,canvas.width,canvas.height);const bg=ctx.createLinearGradient(0,0,0,canvas.height);bg.addColorStop(0,'#0b121a');bg.addColorStop(1,'#07090c');ctx.fillStyle=bg;ctx.fillRect(0,0,canvas.width,canvas.height);ctx.strokeStyle='rgba(255,255,255,.035)';for(let y=20;y<canvas.height;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke()}const offset=str.camera;str.blocks.forEach((b,i)=>drawBlock(b.x,b.y+offset,b.w,b.h,i));if(str.moving)drawBlock(str.moving.x,str.moving.y+offset,str.moving.w,str.moving.h,str.blocks.length,true);str.particles.forEach(p=>{ctx.globalAlpha=Math.max(0,p.life/30);ctx.fillStyle='#d5a94a';ctx.fillRect(p.x,p.y+offset,p.size,p.size)});ctx.globalAlpha=1}
-function drawBlock(x,y,w,h,index,moving=false){const ctx=str.ctx,g=ctx.createLinearGradient(x,y,x+w,y+h);g.addColorStop(0,moving?'#f4d47b':'#d5a94a');g.addColorStop(1,moving?'#b78327':'#7f5b1e');ctx.fillStyle=g;ctx.shadowColor='rgba(213,169,74,.28)';ctx.shadowBlur=moving?18:8;ctx.fillRect(x,y,w,h);ctx.shadowBlur=0;ctx.fillStyle='rgba(255,255,255,.22)';ctx.fillRect(x,y,w,3)}
-function stackDrop(){if(!str||str.over)return;$('#stack-overlay').classList.add('hidden');if(!str.started){str.started=true;return}const m=str.moving,base=str.blocks.at(-1),left=Math.max(m.x,base.x),right=Math.min(m.x+m.w,base.x+base.w),overlap=right-left;if(overlap<=0){finishStackTower();return}const delta=Math.abs(m.x-base.x),perfect=delta<=5;let x=left,w=overlap;if(perfect){x=base.x;w=base.w;str.perfects++;str.combo++;flashStack(`PERFECT ×${str.combo}`);for(let i=0;i<14;i++)str.particles.push({x:x+w/2,y:m.y,vx:(Math.random()-.5)*5,vy:-Math.random()*4,size:2+Math.random()*3,life:22+Math.random()*15})}else{str.combo=0;flashStack(`+${str.height+1}`)}str.height++;str.score+=100+str.combo*25+Math.round(w/5);str.blocks.push({x,y:m.y,w,h:m.h});const cutLeft=m.x<x,cutW=m.w-w;if(cutW>1){const cutX=cutLeft?m.x:x+w;for(let i=0;i<8;i++)str.particles.push({x:cutX+Math.random()*cutW,y:m.y,vx:(cutLeft?-1:1)*(1+Math.random()*3),vy:Math.random()*2,size:2+Math.random()*4,life:22+Math.random()*14})}const nextY=m.y-m.h;if(nextY<170)str.camera+=m.h;str.moving={x:m.dir>0?8:str.canvas.width-8-w,y:nextY,w,h:m.h,dir:m.dir,speed:Math.min(8.2,3.2+str.height*.16)};updateStackHud()}
-function flashStack(text){const el=$('#stack-flash');el.textContent=text;el.classList.remove('show');void el.offsetWidth;el.classList.add('show')}
-function updateStackHud(){if(!str)return;$('#stack-height').textContent=str.height;$('#stack-perfects').textContent=str.perfects;$('#stack-combo').textContent=str.combo;$('#stack-score').textContent=str.score}
-function finishStackTower(){if(!str||str.over)return;str.over=true;cancelAnimationFrame(str.raf);flashStack('TOWER ENDED');const result={height:str.height,perfects:str.perfects,maxWidth:Number((str.blocks.at(-1)?.w||0).toFixed(1)),score:str.score};setTimeout(()=>{str=null;completeGame('stack',result)},850)}
+
+function stackLoop(now){
+  if(!str||str.over)return;
+  const dt=Math.min(2.2,Math.max(.2,(now-str.last)/16.67));
+  str.last=now;
+
+  if(str.started&&str.moving){
+    const m=str.moving;
+    m.x+=m.speed*m.dir*dt;
+    const minX=10,maxX=str.viewWidth-10-m.w;
+    if(m.x<=minX){m.x=minX;m.dir=1}
+    else if(m.x>=maxX){m.x=maxX;m.dir=-1}
+  }
+
+  str.falling.forEach(piece=>{
+    piece.x+=piece.vx*dt;
+    piece.y+=piece.vy*dt;
+    piece.vy+=.55*dt;
+    piece.rotation+=piece.spin*dt;
+    piece.life-=dt;
+  });
+  str.falling=str.falling.filter(piece=>piece.life>0&&piece.y<str.viewHeight+120);
+
+  str.particles.forEach(p=>{
+    p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=.3*dt;p.life-=dt;
+  });
+  str.particles=str.particles.filter(p=>p.life>0);
+
+  drawStack();
+  str.raf=requestAnimationFrame(stackLoop);
+}
+
+function drawStack(){
+  if(!str)return;
+  const {ctx,viewWidth:w,viewHeight:h}=str;
+  ctx.clearRect(0,0,w,h);
+
+  const bg=ctx.createLinearGradient(0,0,0,h);
+  bg.addColorStop(0,'#0b121a');
+  bg.addColorStop(1,'#05070a');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+
+  ctx.strokeStyle='rgba(255,255,255,.035)';
+  ctx.lineWidth=1;
+  for(let y=20;y<h;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
+
+  const offset=str.camera;
+  str.blocks.forEach((b,i)=>drawBlock(b.x,b.y+offset,b.w,b.h,i,false));
+  if(str.moving)drawBlock(str.moving.x,str.moving.y+offset,str.moving.w,str.moving.h,str.blocks.length,true);
+
+  str.falling.forEach((p,i)=>{
+    ctx.save();
+    ctx.translate(p.x+p.w/2,p.y+offset+p.h/2);
+    ctx.rotate(p.rotation);
+    drawBlock(-p.w/2,-p.h/2,p.w,p.h,str.blocks.length+i,false);
+    ctx.restore();
+  });
+
+  str.particles.forEach(p=>{
+    ctx.globalAlpha=Math.max(0,p.life/30);
+    ctx.fillStyle='#f4d47b';ctx.fillRect(p.x,p.y+offset,p.size,p.size);
+  });
+  ctx.globalAlpha=1;
+}
+
+function drawBlock(x,y,w,h,index,moving=false){
+  if(!str||w<=0||h<=0)return;
+  const ctx=str.ctx;
+  const hueShift=(index%5)*5;
+  const g=ctx.createLinearGradient(x,y,x+w,y+h);
+  g.addColorStop(0,moving?`hsl(${43+hueShift} 83% 72%)`:`hsl(${42+hueShift} 62% 57%)`);
+  g.addColorStop(1,moving?`hsl(${36+hueShift} 64% 39%)`:`hsl(${34+hueShift} 58% 28%)`);
+  ctx.fillStyle=g;
+  ctx.shadowColor='rgba(213,169,74,.34)';
+  ctx.shadowBlur=moving?18:7;
+  ctx.fillRect(x,y,w,h);
+  ctx.shadowBlur=0;
+  ctx.fillStyle='rgba(255,255,255,.25)';ctx.fillRect(x,y,w,3);
+  ctx.fillStyle='rgba(0,0,0,.18)';ctx.fillRect(x,y+h-3,w,3);
+}
+
+function stackDrop(){
+  if(!str||str.over)return;
+  const overlay=$('#stack-overlay');
+
+  if(!str.started){
+    str.started=true;
+    overlay.classList.add('hidden');
+    return;
+  }
+
+  const m=str.moving;
+  const base=str.blocks.at(-1);
+  if(!m||!base)return;
+
+  const left=Math.max(m.x,base.x);
+  const right=Math.min(m.x+m.w,base.x+base.w);
+  const overlap=right-left;
+  if(overlap<=0){finishStackTower();return}
+
+  const perfect=Math.abs(m.x-base.x)<=Math.max(4,base.w*.018);
+  let placedX=left,placedW=overlap;
+  if(perfect){
+    placedX=base.x;placedW=base.w;
+    str.perfects++;str.combo++;str.maxCombo=Math.max(str.maxCombo,str.combo);
+    flashStack(`PERFECT ×${str.combo}`);
+    for(let i=0;i<16;i++)str.particles.push({x:placedX+placedW/2,y:m.y,vx:(Math.random()-.5)*5,vy:-1-Math.random()*4,size:2+Math.random()*3,life:22+Math.random()*14});
+  }else{
+    str.combo=0;
+    flashStack(`STACK ${str.height+1}`);
+  }
+
+  const leftCut=Math.max(0,placedX-m.x);
+  const rightCut=Math.max(0,(m.x+m.w)-(placedX+placedW));
+  if(leftCut>1)str.falling.push({x:m.x,y:m.y,w:leftCut,h:m.h,vx:-1.4,vy:.7,rotation:0,spin:-.045,life:120});
+  if(rightCut>1)str.falling.push({x:placedX+placedW,y:m.y,w:rightCut,h:m.h,vx:1.4,vy:.7,rotation:0,spin:.045,life:120});
+
+  str.height++;
+  str.score+=100+str.combo*25+Math.round(placedW/5);
+  str.blocks.push({x:placedX,y:m.y,w:placedW,h:m.h});
+
+  const nextY=m.y-m.h;
+  if(nextY+str.camera<150)str.camera+=m.h;
+  const nextDir=m.dir;
+  str.moving={
+    x:nextDir>0?10:str.viewWidth-10-placedW,
+    y:nextY,w:placedW,h:m.h,dir:nextDir,
+    speed:Math.min(8.2,3.2+str.height*.17)
+  };
+  updateStackHud();
+}
+
+function flashStack(text){
+  const el=$('#stack-flash');
+  if(!el)return;
+  el.textContent=text;el.classList.remove('show');void el.offsetWidth;el.classList.add('show');
+}
+
+function updateStackHud(){
+  if(!str)return;
+  $('#stack-height').textContent=str.height;
+  $('#stack-perfects').textContent=str.perfects;
+  $('#stack-combo').textContent=str.combo;
+  $('#stack-score').textContent=str.score;
+}
+
+function finishStackTower(){
+  if(!str||str.over)return;
+  str.over=true;
+  cancelAnimationFrame(str.raf);
+  flashStack('TOWER ENDED');
+  const result={
+    height:str.height,
+    perfects:str.perfects,
+    maxCombo:str.maxCombo,
+    maxWidth:Number((str.blocks.at(-1)?.w||0).toFixed(1)),
+    score:str.score
+  };
+  setTimeout(()=>{str=null;completeGame('stack',result)},900);
+}
+
 $('#stack-stage').addEventListener('pointerdown',e=>{e.preventDefault();stackDrop()});
 window.addEventListener('keydown',e=>{if(e.code==='Space'&&str){e.preventDefault();stackDrop()}});
 
