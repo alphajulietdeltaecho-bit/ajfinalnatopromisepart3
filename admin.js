@@ -187,7 +187,10 @@ function renderLeaderboard() {
     `;
 
   document.querySelectorAll('.dance-bonus-btn').forEach(button=>{
-    button.addEventListener('click',()=>setDanceBonus(button.dataset.id,Number(button.dataset.value)));
+    button.addEventListener('click',()=>{
+      const input=button.parentElement.querySelector('.dance-bonus-input');
+      setDanceBonus(button.dataset.id,Number(input.value||0));
+    });
   });
 
   updateRevealButton();
@@ -195,7 +198,7 @@ function renderLeaderboard() {
 async function setDanceBonus(playerId,value){
   const player=players.find(p=>p.docId===playerId);
   if(!player)return;
-  const label=value===5?'+5 Dance Bonus':'remove the Dance Bonus';
+  const label=value>0?`apply ${value} Dance Bonus`:'remove the Dance Bonus';
   if(!window.confirm(`${label} for ${player.name||'this competitor'}?`))return;
   try{
     await db.collection('players').doc(playerId).set({
