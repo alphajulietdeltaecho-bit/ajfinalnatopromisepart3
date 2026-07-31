@@ -138,12 +138,25 @@ function renderFinalStandings(settings){
       <em>POINTS</em>
     </article>`).join('');
   const table=$('#final-leaderboard');
-  table.innerHTML=leaderboard.map(player=>`
-    <div class="final-row ${player.rank<=3?'top-three':''}">
-      <span class="final-rank">${player.rank===1?'♛':String(player.rank).padStart(2,'0')}</span>
-      <div><strong>${escReveal(player.name||'Unnamed')}</strong><small>${escReveal(player.department||'—')} · ${Number(player.gamesPlayed||0)}/5 PLAYED</small></div>
-      <b>${Number(player.overall||0).toFixed(1)}</b>
-    </div>`).join('')||'<p class="empty-results">No official standings were recorded.</p>';
+  table.innerHTML=leaderboard.length?`
+    <div class="final-score-table-wrap">
+      <table class="final-score-table">
+        <thead><tr><th>Rank</th><th>Competitor</th><th>Dept</th><th>Final</th><th>Dance Bonus</th><th>Memory</th><th>Aim</th><th>Typing</th><th>Stack Tower</th><th>Sequence</th></tr></thead>
+        <tbody>${leaderboard.map(player=>`
+          <tr class="${player.rank<=3?'top-three':''}">
+            <td class="final-rank">${player.rank===1?'♛ 1':player.rank}</td>
+            <td><strong>${escReveal(player.name||'Unnamed')}</strong><small>${Number(player.gamesPlayed||0)}/5 PLAYED</small></td>
+            <td>${escReveal(player.department||'—')}</td>
+            <td class="final-total">${Number(player.overall||0).toFixed(1)}</td>
+            <td class="dance-bonus-result">${Number(player.danceBonus||0)>0?`+${Number(player.danceBonus).toFixed(0)}`:'—'}</td>
+            <td>${Number(player.memory||0).toFixed(1)}</td>
+            <td>${Number(player.deadeye||0).toFixed(1)}</td>
+            <td>${Number(player.typing||0).toFixed(1)}</td>
+            <td>${Number(player.stack||0).toFixed(1)}</td>
+            <td>${Number(player.sequence||0).toFixed(1)}</td>
+          </tr>`).join('')}</tbody>
+      </table>
+    </div>`:'<p class="empty-results">No official standings were recorded.</p>';
 }
 function launchChampionReveal(settings){
   if(revealStarted)return;
@@ -165,7 +178,7 @@ function launchChampionReveal(settings){
     const timer=setInterval(()=>{
       count--;
       if(count>0){countdown.textContent=count;countdown.classList.remove('pop');void countdown.offsetWidth;countdown.classList.add('pop')}
-      else{clearInterval(timer);countdown.textContent='';setTimeout(()=>setRevealStage('reveal-winner'),350)}
+      else{clearInterval(timer);countdown.textContent='';setTimeout(()=>{setRevealStage('reveal-winner');setTimeout(()=>setRevealStage('reveal-standings'),4500)},350)}
     },900);
   },2800);
 }
