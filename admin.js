@@ -152,8 +152,8 @@ function renderLeaderboard() {
           <td class="score dance-bonus-cell">
             <strong>${p.scoreSet.danceBonus ? `+${p.scoreSet.danceBonus.toFixed(0)}` : '—'}</strong>
             <div class="dance-bonus-actions">
-              <button class="dance-bonus-btn apply" data-id="${esc(p.docId)}" data-value="5" ${p.scoreSet.danceBonus===5?'disabled':''}>+5 DANCE</button>
-              <button class="dance-bonus-btn reset" data-id="${esc(p.docId)}" data-value="0" ${p.scoreSet.danceBonus===0?'disabled':''}>RESET</button>
+              <input class="dance-bonus-input" type="number" min="0" step="0.5" value="${p.scoreSet.danceBonus||0}" style="width:70px">
+               <button class="dance-bonus-btn apply" data-id="${esc(p.docId)}">APPLY</button>
             </div>
           </td>
 
